@@ -32,11 +32,6 @@ resource "aws_s3_bucket" "se2-terraform-bucket" {
   }
 }
 
-# resource "aws_s3_bucket_acl" "se2-terraform-bucket" {
-#   bucket = aws_s3_bucket.se2-terraform-bucket.id
-#   acl    = "private"
-# }
-
 locals {
   s3_origin_id = "terraform-dev"
 }
@@ -120,3 +115,8 @@ resource "aws_s3_bucket_policy" "se2-terraform-bucket" {
   bucket = aws_s3_bucket.se2-terraform-bucket.id
   policy = data.aws_iam_policy_document.s3_policy.json
 }
+
+# resource "aws_s3_bucket_acl" "se2-terraform-bucket" {
+#   bucket = aws_s3_bucket.se2-terraform-bucket.id
+#   acl    = "private"
+# }
