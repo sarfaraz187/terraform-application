@@ -57,7 +57,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "Dev"
+  comment             = "Dev environment updated"
   default_root_object = "index.html"
 
   default_cache_behavior {
