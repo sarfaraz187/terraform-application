@@ -15,7 +15,7 @@ provider "aws" {
 }
 
 # Resource block for AWS S3
-resource "aws_s3_bucket" "se2-terraform-bucket" {
+resource "aws_s3_bucket" "se2-terraform-bucket" { // create se2-demo-bucket
   bucket = "se2-terraform-bucket"
 
   tags = {
@@ -24,6 +24,7 @@ resource "aws_s3_bucket" "se2-terraform-bucket" {
   }
 }
 
+# Origin access identity (OAI) Key name
 locals {
   s3_origin_id = "terraform-dev"
 }
@@ -34,16 +35,18 @@ resource "aws_cloudfront_origin_access_identity" "my_origin_access_identity" {
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
+    # OAI domain name the source which is S3 bucket.
     domain_name = aws_s3_bucket.se2-terraform-bucket.bucket_regional_domain_name
     origin_id   = local.s3_origin_id
 
+    # Using the orgin access created identity from resource
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.my_origin_access_identity.cloudfront_access_identity_path
     }
   }
 
-  enabled             = true
-  is_ipv6_enabled     = true
+  enabled             = true # The distribution is enabled to accept end user requests
+  is_ipv6_enabled     = true # Whether the IPv6 is enabled for the distribution
   comment             = "Dev environment"
   default_root_object = "index.html"
 
@@ -66,11 +69,11 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     max_ttl                = 86400
   }
 
-  price_class = "PriceClass_All"
+  price_class = "PriceClass_All" # Price class of destribution
   restrictions {
     geo_restriction {
-      restriction_type = "none"
-      locations        = []
+      restriction_type = "none" # Method to restrict distribution of your content by country
+      locations        = [] # ISO 3166-1-alpha-2 codes
     }
   }
 
@@ -79,9 +82,10 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = true # SSL configuration for HTTPS to request your objects
   }
 
+  # Error page and route to redirect to
   custom_error_response {
     error_caching_min_ttl = 10
     error_code            = 403
@@ -90,6 +94,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 }
 
+# A data block requests that Terraform read from a given data source and export a given local name
 data "aws_iam_policy_document" "s3_policy" {
   statement {
     actions   = ["s3:GetObject"]
