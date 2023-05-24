@@ -1,13 +1,4 @@
 terraform {
-
-  # backend "remote" {
-  #   organization = "onespace"
-
-  #   workspaces {
-  #     name = "terraform-application"
-  #   }
-  # }
-
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -23,11 +14,12 @@ provider "aws" {
   secret_key = var.aws_secret_key
 }
 
+# Resource block for AWS S3
 resource "aws_s3_bucket" "se2-terraform-bucket" {
   bucket = "se2-terraform-bucket"
 
   tags = {
-    Name        = "My demo Bucket updated"
+    Name        = "Bucket tag name"
     Environment = "Dev"
   }
 }
@@ -52,7 +44,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "Dev environment updated"
+  comment             = "Dev environment"
   default_root_object = "index.html"
 
   default_cache_behavior {
@@ -75,7 +67,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   price_class = "PriceClass_All"
-
   restrictions {
     geo_restriction {
       restriction_type = "none"
@@ -111,12 +102,21 @@ data "aws_iam_policy_document" "s3_policy" {
   }
 }
 
+# We get the bucket ID from the resource that we created above
 resource "aws_s3_bucket_policy" "se2-terraform-bucket" {
   bucket = aws_s3_bucket.se2-terraform-bucket.id
-  policy = data.aws_iam_policy_document.s3_policy.json
+  policy = data.aws_iam_policy_document.s3_policy.json # Policy created in data module is passed in here
 }
 
-# resource "aws_s3_bucket_acl" "se2-terraform-bucket" {
-#   bucket = aws_s3_bucket.se2-terraform-bucket.id
+# resource "aws_s3_bucket_acl" "se2-se2-terraform-bucket" {
+#   bucket = aws_s3_bucket.se2-se2-terraform-bucket.id
 #   acl    = "private"
+# }
+
+# backend "remote" {
+#   organization = "onespace"
+
+#   workspaces {
+#     name = "terraform-application"
+#   }
 # }
